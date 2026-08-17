@@ -129,13 +129,14 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
   const token = req.cookie?.refreshToken || req.body?.refreshToken;
+  console.log(token);
   if (!token) throw new ApiError(401, "invalid credentials ");
   const decodedToken = await jwt.verify(
     token,
     process.env.REFRESH_TOKEN_SECRET
   );
   const user = await User.findById(decodedToken?.user_id);
-  if (!user) throw new ApiError(401, " invalid credentials ");
+  if (!user) throw new ApiError(401, "user with these tokens doesn't exist ");
 
   if (token !== user.refreshToken)
     throw new ApiError(401, "token is invalid or expire ");
