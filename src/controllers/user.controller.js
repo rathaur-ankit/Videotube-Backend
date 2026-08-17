@@ -129,7 +129,6 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
   const token = req.cookie?.refreshToken || req.body?.refreshToken;
-  console.log(token);
   if (!token) throw new ApiError(401, "invalid credentials ");
   const decodedToken = await jwt.verify(
     token,
