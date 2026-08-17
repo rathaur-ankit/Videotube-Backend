@@ -115,16 +115,16 @@ const logoutUser = asyncHandler(async (req, res) => {
     req.user._id,
     {
       $set: {
-        refreshToken: undefined,
+        refreshToken: null,
       },
     },
-    { new: true }
+    { returnDocument: "after" }
   );
   res
     .status(200)
     .clearCookie("accessToken", options)
     .clearCookie("refreshToken", options)
-    .json(new new ApiResponse(200, {}, "logout successfully ")());
+    .json(new ApiResponse(200, {}, "logout successfully "));
 });
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
