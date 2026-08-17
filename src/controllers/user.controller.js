@@ -158,7 +158,7 @@ const resetPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
   if (!oldPassword || !newPassword)
     throw new ApiError(400, "all fields are required ");
-  const user = await User.findById(user._id);
+  const user = await User.findById(req.user._id);
   if (!user) throw new ApiError(401, "invalid credentials ");
   const isPassCorrect = user.isPasswordCorrect(oldPassword);
   if (!isPassCorrect) throw new ApiError(401, "user not found ");
@@ -168,10 +168,39 @@ const resetPassword = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, {}, "password reset successfully"));
 });
 
+const getCurrentUser = asyncHandler(async (req, res) => {
+  res
+    .status(200)
+    .json(new ApiResponse(200, "user fetched successfully", req.user));
+});
+
+const updateUserAvatar = asyncHandler(async (req, res) => {
+  const avatar = req.files?.path;
+  if (!avatar) throw new ApiError(400, "please provide avatar image ");
+
+  const result = await uploadOnCloudinary(avatar);
+  if (!result.url) throw new ApiError(500, "uploaded avatar's url is missing ");
+
+  const response = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        avatar: result.url,
+      },
+    },
+    { new: true }
+  ).select("-password -refreshToken");
+  res
+    .status(200)
+    .json(new ApiResponse(200, "avatar updated successfully", response));
+});
+
 export {
   registerUser,
   loginUser,
   logoutUser,
   refreshAccessToken,
   resetPassword,
+  getCurrentUser,
+  updateUserAvatar,
 };
