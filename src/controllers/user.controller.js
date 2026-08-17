@@ -154,4 +154,24 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "token refreshed successfully "));
 });
 
-export { registerUser, loginUser, logoutUser };
+const resetPassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  if (!oldPassword || !newPassword)
+    throw new ApiError(400, "all fields are required ");
+  const user = await User.findById(user._id);
+  if (!user) throw new ApiError(401, "invalid credentials ");
+  const isPassCorrect = user.isPasswordCorrect(oldPassword);
+  if (!isPassCorrect) throw new ApiError(401, "user not found ");
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+
+  res.status(200).json(new ApiResponse(200, {}, "password reset successfully"));
+});
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  resetPassword,
+};
